@@ -55,7 +55,9 @@ Three tabs, all reading live off the pipeline/model code above (no separate API 
 - **Vote Outcomes & Priority** — recorded votes ranked by engagement priority (close calls first), with the model's predicted probability next to the real outcome.
 - **Try the Model** — pick a committee/motion type/term and see the predicted P(carried) and priority score live.
 
-If `data/raw/` or `models/outcome_model.joblib` are missing, the dashboard offers a button to fetch/train them itself rather than requiring the CLI commands above.
+If `data/raw/` or `models/outcome_model.joblib` are missing, the dashboard auto-downloads/auto-trains on first run rather than requiring a manual step (useful on a host with an ephemeral filesystem, e.g. Streamlit Community Cloud).
+
+**Deploying**: `runtime.txt` pins Python 3.12 — pandas 2.2.2 (and some other pinned deps) have no prebuilt wheel for newer Pythons like 3.14, which forces a from-source build that fails on a newer compiler. If a host ignores `runtime.txt`, set the Python version explicitly in its settings instead.
 
 ## What's real vs. what's next
 
