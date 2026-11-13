@@ -82,6 +82,13 @@ def load_requests(path: str) -> pd.DataFrame:
 
     df["status"] = df["status"].str.strip()
     df["is_open"] = ~df["status"].str.lower().eq("closed")
+
+    # Stray trailing whitespace in the source file (e.g. "CC " vs "CC")
+    # otherwise makes the same committee look like two different ones --
+    # caught because a value_counts() on requesting_body showed two
+    # entries for "CC" and two for "NY" before this strip.
+    df["requesting_body"] = df["requesting_body"].str.strip()
+
     return df.drop(columns=["closed_by_raw"])
 
 
