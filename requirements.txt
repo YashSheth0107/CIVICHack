@@ -1,9 +1,14 @@
-pandas>=2.0
-requests>=2.31
-openpyxl>=3.1
-scikit-learn>=1.4
-python-dateutil>=2.8
-pyyaml>=6.0
-joblib>=1.3
-pytest>=8.0
-streamlit>=1.35
+# Pinned to exact versions verified working together (including a real
+# cold-start test) rather than left open-ended -- an unpinned install on
+# a fresh host (e.g. Streamlit Cloud) can resolve a much newer major
+# version than what's been tested here and break in ways that are hard
+# to diagnose from a redacted cloud error message.
+pandas==2.2.2
+requests==2.32.3
+openpyxl==3.1.5
+scikit-learn==1.5.1
+python-dateutil==2.9.0.post0
+pyyaml==6.0.1
+joblib==1.4.2
+pytest==9.2.0
+streamlit==1.37.1
