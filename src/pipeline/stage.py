@@ -1,8 +1,7 @@
 """
-Classify each report request's current lifecycle stage -- the backbone
-of the "Decision Lifecycle Tracker" (idea #1). Rule-based on purpose:
-the fields needed are already structured, so there's no need for NLP
-here (keep that budget for topic tagging / summarization later).
+Classify each report request's current lifecycle stage. Rule-based on
+purpose: the fields needed are already structured, so there's no need
+for NLP here (keep that budget for topic tagging / summarization later).
 
 Stages, in order of progress:
   requested            -- status is open (NCF); no follow-up report yet.

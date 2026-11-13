@@ -54,7 +54,7 @@ Every module above also runs standalone with `python -m <module>` and prints a s
 - Trains a real outcome model (logistic regression, time-split train/test, AUC ≈ 0.80 on the current term) and converts its probability into a close-call-first engagement priority score.
 
 **Deliberately left as roadmap** (see `docs/data_dictionary.md` → "Known gaps"):
-- Plain-language summarization of the `directive` text (the NLP piece from the original idea #2).
+- Plain-language summarization of the `directive` text.
 - A pre-filter for "will this item even get a recorded vote" — most council business doesn't, and the current model only applies to the contested subset.
 - Deputation deadline / next-meeting-date extraction from agenda data (needs a third dataset not yet wired in).
 - Ward/geography mapping (needs a councillor-to-ward lookup; geocoding free text item titles is explicitly out of scope for now).

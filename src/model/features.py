@@ -1,5 +1,5 @@
 """
-Feature engineering for the outcome predictor (idea #5).
+Feature engineering for the outcome predictor.
 
 Only uses information available BEFORE a vote happens:
   - committee, motion_type, term (known the moment the item is scheduled)

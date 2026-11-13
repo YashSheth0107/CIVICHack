@@ -50,4 +50,4 @@ Both datasets are published under the [Open Government Licence - Toronto](https:
 ## Known gaps / things a future pass should fix
 - **Report Request Log only goes back to the 2018-2022 term** (started 2019) — the Voting Record goes back to 2006. Historical model training can use all 5 terms of voting data; the lifecycle tracker is limited to the 2 terms that have a Report Request Log.
 - **`closed_by_item_ids` with more than one entry** (54 of 2,065 current-term rows) can't be resolved to a single follow-up vote automatically — flagged as `ambiguous_multi_item` in `stage.py` rather than guessed.
-- **No ward/geography field in either dataset.** Mapping decisions to "does this affect my ward" (the original idea #3) needs a third source — Councillor-to-ward lookup is straightforward; geocoding free-text item titles/directives is not, and is intentionally out of scope for this pass.
+- **No ward/geography field in either dataset.** Mapping decisions to "does this affect my ward" needs a third source — Councillor-to-ward lookup is straightforward; geocoding free-text item titles/directives is not, and is intentionally out of scope for this pass.
