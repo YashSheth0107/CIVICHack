@@ -79,8 +79,31 @@ if not _data_ready():
     # start/wake-from-sleep starts with no data on disk, and a judge
     # opening the link shouldn't have to click a button before seeing
     # anything.
-    with st.spinner("First run: downloading from Toronto Open Data..."):
+    #
+    # Guarded by a retry counter: if fetch_datasets() "succeeds" (no
+    # exception) but the files still aren't on disk afterward -- e.g. a
+    # host where the working directory isn't what we expect, or a
+    # network/permissions quirk that doesn't raise -- this would
+    # otherwise retry -> rerun -> retry forever, showing as an endless
+    # spinner with no error rather than failing loudly.
+    attempts = st.session_state.get("_data_bootstrap_attempts", 0)
+    if attempts >= 2:
+        st.error(
+            f"Could not prepare the data after {attempts} attempts. "
+            f"Expected files at '{RRL_PATH}' and '{VR_PATH}' (cwd: {os.getcwd()}) but they're not there. "
+            "Check the app logs for the real error."
+        )
+        st.stop()
+
+    st.session_state["_data_bootstrap_attempts"] = attempts + 1
+    with st.spinner(f"First run: downloading from Toronto Open Data... (attempt {attempts + 1})"):
         fetch_datasets()
+
+    if not _data_ready():
+        st.error(f"Download ran without error, but the expected files are still missing (cwd: {os.getcwd()}).")
+        st.stop()
+
+    st.session_state["_data_bootstrap_attempts"] = 0
     st.cache_data.clear()
     st.rerun()
 
@@ -121,11 +144,24 @@ with tab1:
 # --- Tab 2: Vote Outcomes & Engagement Priority -----------------------------
 with tab2:
     if not os.path.exists(MODEL_PATH):
-        # Same auto-bootstrap reasoning as the data download above.
-        with st.spinner("First run: training the outcome model..."):
+        # Same auto-bootstrap reasoning, and same retry guard, as the
+        # data download above.
+        attempts = st.session_state.get("_model_bootstrap_attempts", 0)
+        if attempts >= 2:
+            st.error(f"Could not train the model after {attempts} attempts. Check the app logs for the real error.")
+            st.stop()
+
+        st.session_state["_model_bootstrap_attempts"] = attempts + 1
+        with st.spinner(f"First run: training the outcome model... (attempt {attempts + 1})"):
             model = train([VR_PATH])
             os.makedirs("models", exist_ok=True)
             joblib.dump(model, MODEL_PATH)
+
+        if not os.path.exists(MODEL_PATH):
+            st.error("Training ran without error, but the model file still wasn't saved.")
+            st.stop()
+
+        st.session_state["_model_bootstrap_attempts"] = 0
         st.rerun()
 
     st.caption(
