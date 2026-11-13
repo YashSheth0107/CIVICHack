@@ -70,6 +70,22 @@ def friendly_committee(code: str) -> str:
     return COMMITTEE_NAMES.get(code.strip().upper(), code)
 
 
+# Toronto's 4 Community Councils each cover one of the old pre-amalgamation
+# municipalities -- a decision routed through one of them is local to that
+# part of the city. Everything else (City Council itself, and the
+# standing committees like Planning and Housing) is city-wide, not tied
+# to one area.
+def area_of(committee_code_or_name: str) -> str:
+    name = friendly_committee(committee_code_or_name)
+    if not isinstance(name, str):
+        return "City-wide"
+    name_lower = name.lower()
+    for area in ["Toronto and East York", "North York", "Scarborough", "Etobicoke York"]:
+        if area.lower() in name_lower:
+            return area
+    return "City-wide"
+
+
 def download_button(df: pd.DataFrame, filename: str, key: str) -> None:
     """Download exactly what's currently shown in the table above it."""
     st.download_button(
@@ -202,17 +218,22 @@ with tab1:
     label_to_stage = {v: k for k, v in STAGE_LABELS.items()}
     stage_label_options = [STAGE_LABELS[s] for s in decisions["stage"].unique()]
 
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
     with col1:
         selected_labels = st.multiselect("What's happening", stage_label_options, default=stage_label_options)
     with col2:
+        area_options = ["All of Toronto", "City-wide", "Toronto and East York", "North York", "Scarborough", "Etobicoke York"]
+        area_filter = st.selectbox("Part of the city", area_options)
+    with col3:
         committee_display = sorted(decisions["requesting_body"].dropna().apply(friendly_committee).unique())
-        body_filter = st.multiselect("Requested by", committee_display)
+        body_filter = st.multiselect("Requested by (specific committee)", committee_display)
 
     search = st.text_input("Search by title", placeholder="e.g. housing, bike lanes, budget...")
 
     selected_stages = [label_to_stage[s] for s in selected_labels]
     filtered = decisions[decisions["stage"].isin(selected_stages)].copy()
+    if area_filter != "All of Toronto":
+        filtered = filtered[filtered["requesting_body"].apply(area_of) == area_filter]
     if body_filter:
         matching_codes = [c for c in decisions["requesting_body"].dropna().unique() if friendly_committee(c) in body_filter]
         filtered = filtered[filtered["requesting_body"].isin(matching_codes)]
@@ -223,10 +244,12 @@ with tab1:
     st.bar_chart(chart_data)
 
     filtered["What's happening"] = filtered["stage"].map(STAGE_LABELS)
+    filtered["Area"] = filtered["requesting_body"].apply(area_of)
     filtered["Requested by"] = filtered["requesting_body"].apply(friendly_committee)
     display_cols = {
         "item_id": "Item #",
         "agenda_title": "Title",
+        "Area": "Area",
         "Requested by": "Requested by",
         "meeting_date": "Date requested",
         "What's happening": "What's happening",
@@ -288,18 +311,27 @@ with tab2:
     model_mtime = os.path.getmtime(MODEL_PATH)
     outcomes = load_vote_outcomes_with_predictions(model_mtime)
 
-    priority_choice = st.radio(
-        "Show me:",
-        ["Close calls only", "Close calls + leaning either way", "Everything (incl. landslides)"],
-        horizontal=True,
-    )
+    col1, col2 = st.columns(2)
+    with col1:
+        priority_choice = st.radio(
+            "Show me:",
+            ["Close calls only", "Close calls + leaning either way", "Everything (incl. landslides)"],
+            horizontal=True,
+        )
+    with col2:
+        area_options_2 = ["All of Toronto", "City-wide", "Toronto and East York", "North York", "Scarborough", "Etobicoke York"]
+        area_filter_2 = st.selectbox("Part of the city", area_options_2, key="area_tab2")
+
     min_rank = {"Close calls only": 2, "Close calls + leaning either way": 1, "Everything (incl. landslides)": 0}[priority_choice]
     priority_rank = {"Low": 0, "Medium": 1, "High": 2}
 
     outcomes = outcomes.copy()
     outcomes["priority_rank"] = outcomes["engagement_priority_label"].str.split(" - ").str[0].map(priority_rank)
     shown = outcomes[outcomes["priority_rank"] >= min_rank].sort_values("engagement_priority_score", ascending=False)
+    if area_filter_2 != "All of Toronto":
+        shown = shown[shown["committee"].apply(area_of) == area_filter_2]
 
+    shown["Area"] = shown["committee"].apply(area_of)
     shown["Committee"] = shown["committee"].apply(friendly_committee)
     shown["What happened"] = shown["outcome"].map({"carried": "Passed", "not_carried": "Did not pass"})
 
@@ -310,7 +342,7 @@ with tab2:
             "p_carried": "Predicted chance of passing",
             "engagement_priority_label": "Priority",
         }
-    )[["What was voted on", "Committee", "Type of motion", "What happened", "Predicted chance of passing", "Priority"]]
+    )[["What was voted on", "Area", "Committee", "Type of motion", "What happened", "Predicted chance of passing", "Priority"]]
 
     st.caption(f"Showing {len(shown):,} of {len(outcomes):,} contested votes")
     st.dataframe(
