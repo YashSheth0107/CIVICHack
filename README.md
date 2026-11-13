@@ -44,6 +44,19 @@ python -m src.model.predict                  # demo: predicted P(carried) + prio
 
 Every module above also runs standalone with `python -m <module>` and prints a sanity-check summary — useful for confirming a change didn't break anything without wiring up the full pipeline.
 
+## Dashboard
+
+```bash
+streamlit run app.py
+```
+
+Three tabs, all reading live off the pipeline/model code above (no separate API or database):
+- **Decision Lifecycle** — filterable/searchable table of every report request and its current stage.
+- **Vote Outcomes & Priority** — recorded votes ranked by engagement priority (close calls first), with the model's predicted probability next to the real outcome.
+- **Try the Model** — pick a committee/motion type/term and see the predicted P(carried) and priority score live.
+
+If `data/raw/` or `models/outcome_model.joblib` are missing, the dashboard offers a button to fetch/train them itself rather than requiring the CLI commands above.
+
 ## What's real vs. what's next
 
 **Working now**, verified against live data (not stubbed):
