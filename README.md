@@ -2,6 +2,8 @@
 
 **🔗 Live app: [council-tracker.streamlit.app](https://council-tracker.streamlit.app/)**
 
+[![Tests](https://github.com/YashSheth0107/CIVICHack/actions/workflows/tests.yml/badge.svg)](https://github.com/YashSheth0107/CIVICHack/actions/workflows/tests.yml)
+
 **Challenge**: How might we help residents understand a proposed municipal decision, how it could affect them, and when they can have a say?
 
 Council Tracker answers this with two combined pieces, built on City of Toronto Open Data:
