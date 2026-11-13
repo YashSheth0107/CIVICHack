@@ -17,6 +17,18 @@ See src/pipeline/stage.py for how the two datasets combine.
 One row in the raw CSV = one councillor's vote on one motion. This
 module collapses that to one row per *vote event* (every councillor
 who voted on the same item/motion/timestamp shares one outcome).
+
+ORDERING CAVEAT: `Date/Time` is frequently NaT for City Council-level
+events (as opposed to committee-level ones, which are usually dated) --
+e.g. two competing motions on the same item can both show no timestamp
+at all. `_id`, however, increases strictly with true chronological
+order everywhere it can be checked against a known Date/Time (verified:
+zero out-of-order cases across the whole current-term file), because
+rows are appended to the source file in the order the Clerk recorded
+them. So `event_seq` (the lowest `_id` in each vote event) is the
+reliable ordering signal for "which vote happened last" -- NOT
+`vote_datetime`, which is only good for display/filtering, not for
+determining sequence when it's missing.
 """
 from __future__ import annotations
 
@@ -98,6 +110,7 @@ def load_vote_events(path: str) -> pd.DataFrame:
             is_tie=("is_tie", "first"),
             yes_count=("yes_count", "first"),
             no_count=("no_count", "first"),
+            event_seq=("_id", "min"),
         )
         .reset_index()
     )
@@ -113,7 +126,7 @@ def load_vote_events(path: str) -> pd.DataFrame:
             "Term": "term",
         }
     )
-    return events.sort_values("vote_datetime").reset_index(drop=True)
+    return events.sort_values("event_seq").reset_index(drop=True)
 
 
 if __name__ == "__main__":

@@ -24,11 +24,18 @@ def build_decisions_table(report_request_log_path: str, voting_record_path: str)
     votes_df = load_vote_events(voting_record_path)
 
     # One row per agenda item for the voting side: an item can have several
-    # vote events (amendments, then the main motion) -- keep the LAST
-    # recorded vote as that item's effective outcome, and remember how
-    # many recorded votes it took to get there (a proxy for how contested
-    # it was -- useful later for the engagement-priority model).
-    votes_df = votes_df.sort_values("vote_datetime")
+    # vote events (amendments, competing motions, then the main motion) --
+    # keep the LAST recorded vote as that item's effective outcome, and
+    # remember how many recorded votes it took to get there (a proxy for
+    # how contested it was -- useful later for the engagement-priority
+    # model). Ordered by `event_seq`, not `vote_datetime` -- City
+    # Council-level events are frequently missing a timestamp, and two
+    # competing motions on the same item with both missing timestamps
+    # would otherwise fall back to an arbitrary (alphabetical) order. See
+    # the ordering caveat in load_voting_record.py for how this was
+    # caught: a real item's "Receive Item" (failed) and "Adopt Item"
+    # (carried) -- voted on in that order -- previously came out reversed.
+    votes_df = votes_df.sort_values("event_seq")
     item_outcomes = (
         votes_df.groupby("agenda_item_id")
         .agg(

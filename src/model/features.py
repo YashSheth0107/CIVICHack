@@ -10,6 +10,13 @@ Only uses information available BEFORE a vote happens:
 Deliberately excludes n_recorded_votes / yes_count / no_count / margin --
 those are only known AFTER the vote, so they're outcome leakage, not
 predictors. They're still useful for descriptive analysis, just not here.
+
+Ordered by `event_seq`, NOT `vote_datetime` -- 65% of all vote events
+(83% of City Council-level ones specifically) have no timestamp at all,
+so sorting by vote_datetime would dump most of the dataset into an
+arbitrary block at the end instead of its true chronological position,
+corrupting the "no future leakage" guarantee this whole module exists
+for. See the ordering caveat in load_voting_record.py.
 """
 from __future__ import annotations
 
@@ -20,7 +27,7 @@ TARGET_COLUMN = "target"
 
 
 def build_feature_table(vote_events: pd.DataFrame) -> pd.DataFrame:
-    df = vote_events.sort_values("vote_datetime").reset_index(drop=True).copy()
+    df = vote_events.sort_values("event_seq").reset_index(drop=True).copy()
     df[TARGET_COLUMN] = (df["outcome"] == "carried").astype(int)
 
     overall_prior = df[TARGET_COLUMN].shift().expanding().mean()
