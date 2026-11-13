@@ -26,7 +26,7 @@ from src.pipeline.join_decisions import build_decisions_table
 from src.pipeline.load_voting_record import load_vote_events
 from src.pipeline.stage import add_stage
 
-st.set_page_config(page_title="Council Tracker", page_icon="🏛️", layout="wide")
+st.set_page_config(page_title="Council Tracker", layout="wide")
 
 RRL_PATH = f"{RAW_DATA_DIR}/report_request_log_{CURRENT_TERM}.xlsx"
 VR_PATH = f"{RAW_DATA_DIR}/voting_record_{CURRENT_TERM}.csv"
@@ -35,12 +35,12 @@ MODEL_PATH = "models/outcome_model.joblib"
 # --- Plain-language lookups (presentation only -- the real data keeps
 # its original values; these only change what's displayed) -----------------
 STAGE_LABELS = {
-    "requested": "📨 Report requested",
-    "report_delivered": "📄 Report delivered, awaiting vote",
-    "decided_carried": "✅ Passed",
-    "decided_not_carried": "❌ Did not pass",
-    "closed_without_item": "🗃️ Closed, no vote needed",
-    "ambiguous_multi_item": "❓ Unclear outcome",
+    "requested": "Report requested",
+    "report_delivered": "Report delivered, awaiting vote",
+    "decided_carried": "Passed",
+    "decided_not_carried": "Did not pass",
+    "closed_without_item": "Closed, no vote needed",
+    "ambiguous_multi_item": "Unclear outcome",
 }
 
 # The Report Request Log abbreviates which body asked for the report.
@@ -63,18 +63,11 @@ COMMITTEE_NAMES = {
     "BOH": "Board of Health",
 }
 
-PRIORITY_EMOJI = {"High": "🔥", "Medium": "🤏", "Low": "✅"}
-
 
 def friendly_committee(code: str) -> str:
     if not isinstance(code, str):
         return code
     return COMMITTEE_NAMES.get(code.strip().upper(), code)
-
-
-def friendly_priority(label: str) -> str:
-    word = label.split(" - ")[0]
-    return f"{PRIORITY_EMOJI.get(word, '')} {label}"
 
 
 def _data_ready() -> bool:
@@ -117,21 +110,21 @@ def committee_motion_lookup() -> tuple[list[str], list[str], dict, dict]:
 
 
 # --- Header ------------------------------------------------------------
-st.title("🏛️ Council Tracker")
+st.title("Council Tracker")
 st.markdown("##### See what's happening at Toronto City Hall — and when your voice matters most.")
 
-with st.expander("ℹ️ How to use this page"):
+with st.expander("How to use this page"):
     st.markdown(
         """
 Toronto City Council handles thousands of decisions. This page turns two of the City's own public
 records into something easier to follow:
 
-- **📋 Browse Decisions** — every report Council or a committee has asked for, and where it stands
+- **Browse Decisions** — every report Council or a committee has asked for, and where it stands
   right now: still waiting, delivered, passed, or didn't pass.
-- **🎯 Where Your Voice Matters** — of the votes that were actually contested (not just rubber-stamped),
+- **Where Your Voice Matters** — of the votes that were actually contested (not just rubber-stamped),
   which ones were genuinely close. A close vote is where showing up or writing in is most likely to
   make a difference — a landslide, in either direction, usually isn't.
-- **🔬 Explore the Model** *(optional, for the curious)* — a hands-on way to see how the prediction
+- **Explore the Model** *(optional, for the curious)* — a hands-on way to see how the prediction
   behind the "close vote" signal actually works.
         """
     )
@@ -180,13 +173,13 @@ failed = counts.get("decided_not_carried", 0)
 
 c1, c2, c3, c4 = st.columns(4)
 c1.metric("Total report requests", f"{len(decisions):,}")
-c2.metric("⏳ Still pending", f"{pending:,}")
-c3.metric("✅ Passed", f"{passed:,}")
-c4.metric("❌ Did not pass", f"{failed:,}")
+c2.metric("Still pending", f"{pending:,}")
+c3.metric("Passed", f"{passed:,}")
+c4.metric("Did not pass", f"{failed:,}")
 
 st.divider()
 
-tab1, tab2, tab3 = st.tabs(["📋 Browse Decisions", "🎯 Where Your Voice Matters", "🔬 Explore the Model"])
+tab1, tab2, tab3 = st.tabs(["Browse Decisions", "Where Your Voice Matters", "Explore the Model"])
 
 # --- Tab 1: Decision Lifecycle Tracker -------------------------------------
 with tab1:
@@ -205,7 +198,7 @@ with tab1:
         committee_display = sorted(decisions["requesting_body"].dropna().apply(friendly_committee).unique())
         body_filter = st.multiselect("Requested by", committee_display)
 
-    search = st.text_input("🔎 Search by title", placeholder="e.g. housing, bike lanes, budget...")
+    search = st.text_input("Search by title", placeholder="e.g. housing, bike lanes, budget...")
 
     selected_stages = [label_to_stage[s] for s in selected_labels]
     filtered = decisions[decisions["stage"].isin(selected_stages)].copy()
@@ -227,7 +220,7 @@ with tab1:
         "meeting_date": "Date requested",
         "What's happening": "What's happening",
     }
-    show_technical = st.checkbox("🔧 Show technical details (item numbers, follow-up links)")
+    show_technical = st.checkbox("Show technical details (item numbers, follow-up links)")
     if show_technical:
         display_cols = {
             **display_cols,
@@ -296,8 +289,7 @@ with tab2:
     shown = outcomes[outcomes["priority_rank"] >= min_rank].sort_values("engagement_priority_score", ascending=False)
 
     shown["Committee"] = shown["committee"].apply(friendly_committee)
-    shown["What happened"] = shown["outcome"].map({"carried": "✅ Passed", "not_carried": "❌ Did not pass"})
-    shown["Priority"] = shown["engagement_priority_label"].apply(friendly_priority)
+    shown["What happened"] = shown["outcome"].map({"carried": "Passed", "not_carried": "Did not pass"})
 
     st.caption(f"Showing {len(shown):,} of {len(outcomes):,} contested votes")
     st.dataframe(
@@ -306,6 +298,7 @@ with tab2:
                 "agenda_item_title": "What was voted on",
                 "motion_type": "Type of motion",
                 "p_carried": "Predicted chance of passing",
+                "engagement_priority_label": "Priority",
             }
         )[
             ["What was voted on", "Committee", "Type of motion", "What happened", "Predicted chance of passing", "Priority"]
@@ -333,7 +326,7 @@ with tab3:
         "below and see what the model estimates — this is the same model behind the previous tab, just "
         "with knobs you can turn yourself."
     )
-    st.caption(f"📅 Based on recorded votes from the current council term ({CURRENT_TERM}).")
+    st.caption(f"Based on recorded votes from the current council term ({CURRENT_TERM}).")
 
     c1, c2 = st.columns(2)
     with c1:
@@ -365,7 +358,7 @@ with tab3:
 
     m1, m2 = st.columns(2)
     m1.metric("Predicted chance it passes", f"{p:.0%}")
-    m2.metric("Priority to weigh in", f"{PRIORITY_EMOJI.get(priority_word, '')} {priority_word}")
+    m2.metric("Priority to weigh in", priority_word)
     st.write(scored["engagement_priority_label"])
 
 st.divider()
