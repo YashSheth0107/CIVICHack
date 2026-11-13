@@ -70,6 +70,17 @@ def friendly_committee(code: str) -> str:
     return COMMITTEE_NAMES.get(code.strip().upper(), code)
 
 
+def download_button(df: pd.DataFrame, filename: str, key: str) -> None:
+    """Download exactly what's currently shown in the table above it."""
+    st.download_button(
+        "Download this table as CSV",
+        data=df.to_csv(index=False).encode("utf-8"),
+        file_name=filename,
+        mime="text/csv",
+        key=key,
+    )
+
+
 def _data_ready() -> bool:
     return os.path.exists(RRL_PATH) and os.path.exists(VR_PATH)
 
@@ -237,6 +248,7 @@ with tab1:
         hide_index=True,
         column_config={"Date requested": st.column_config.DateColumn("Date requested", format="MMM D, YYYY")},
     )
+    download_button(shown, "council_decisions.csv", key="download_tab1")
 
 # --- Tab 2: Vote Outcomes & Engagement Priority -----------------------------
 with tab2:
@@ -291,18 +303,18 @@ with tab2:
     shown["Committee"] = shown["committee"].apply(friendly_committee)
     shown["What happened"] = shown["outcome"].map({"carried": "Passed", "not_carried": "Did not pass"})
 
+    tab2_display = shown.rename(
+        columns={
+            "agenda_item_title": "What was voted on",
+            "motion_type": "Type of motion",
+            "p_carried": "Predicted chance of passing",
+            "engagement_priority_label": "Priority",
+        }
+    )[["What was voted on", "Committee", "Type of motion", "What happened", "Predicted chance of passing", "Priority"]]
+
     st.caption(f"Showing {len(shown):,} of {len(outcomes):,} contested votes")
     st.dataframe(
-        shown.rename(
-            columns={
-                "agenda_item_title": "What was voted on",
-                "motion_type": "Type of motion",
-                "p_carried": "Predicted chance of passing",
-                "engagement_priority_label": "Priority",
-            }
-        )[
-            ["What was voted on", "Committee", "Type of motion", "What happened", "Predicted chance of passing", "Priority"]
-        ],
+        tab2_display,
         use_container_width=True,
         hide_index=True,
         column_config={
@@ -311,6 +323,7 @@ with tab2:
             )
         },
     )
+    download_button(tab2_display, "council_vote_priorities.csv", key="download_tab2")
 
 # --- Tab 3: Explore the Model ------------------------------------------
 with tab3:
