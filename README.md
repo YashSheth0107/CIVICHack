@@ -1,5 +1,7 @@
 # Council Tracker
 
+**🔗 Live app: [council-tracker.streamlit.app](https://council-tracker.streamlit.app/)**
+
 **Challenge**: How might we help residents understand a proposed municipal decision, how it could affect them, and when they can have a say?
 
 Council Tracker answers this with two combined pieces, built on City of Toronto Open Data:
@@ -45,6 +47,8 @@ python -m src.model.predict                  # demo: predicted P(carried) + prio
 Every module above also runs standalone with `python -m <module>` and prints a sanity-check summary — useful for confirming a change didn't break anything without wiring up the full pipeline.
 
 ## Dashboard
+
+Hosted version: **https://council-tracker.streamlit.app/** — or run it locally:
 
 ```bash
 streamlit run app.py
