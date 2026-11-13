@@ -12,7 +12,7 @@ Both published by the City of Toronto under the [Open Government Licence - Toron
 - [Report Request Log](https://open.toronto.ca/dataset/report-request-log/) — tracks staff report requests made by Council and its committees.
 - [Members of Toronto City Council - Voting Record](https://open.toronto.ca/dataset/members-of-toronto-city-council-voting-record/) — recorded votes at Council and committee meetings.
 
-Full column-by-column notes (including a couple of surprising quirks in the raw files) are in [docs/data_dictionary.md](docs/data_dictionary.md) — worth reading before touching the loaders.
+Full column-by-column notes (including a couple of surprising quirks in the raw files) are in [docs/data_dictionary.md](docs/data_dictionary.md) — worth reading before touching the loaders. For a full walkthrough of how every module connects, including a real worked example traced end-to-end, see [docs/architecture.md](docs/architecture.md).
 
 ## Architecture
 
@@ -64,7 +64,7 @@ If `data/raw/` or `models/outcome_model.joblib` are missing, the dashboard offer
 - Parses every one of the 252 distinct `Result` value formats in the Voting Record.
 - Joins 2,065 report requests to their follow-up vote outcomes (207 currently resolve to a recorded vote).
 - Classifies every request into one of 6 lifecycle stages (`requested`, `report_delivered`, `decided_carried`, `decided_not_carried`, `closed_without_item`, `ambiguous_multi_item`).
-- Trains a real outcome model (logistic regression, time-split train/test, AUC ≈ 0.80 on the current term) and converts its probability into a close-call-first engagement priority score.
+- Trains a real outcome model (logistic regression, time-split train/test, AUC ≈ 0.81 on the current term) and converts its probability into a close-call-first engagement priority score.
 
 **Deliberately left as roadmap** (see `docs/data_dictionary.md` → "Known gaps"):
 - Plain-language summarization of the `directive` text.
