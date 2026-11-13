@@ -34,17 +34,25 @@ def list_resources(package_name: str) -> list[dict[str, Any]]:
     return get_package(package_name)["resources"]
 
 
-def find_resource(package_name: str, *, name_contains: str) -> dict[str, Any]:
-    """Find the single resource whose 'name' contains `name_contains`
-    (case-insensitive). Raises if zero or more than one match.
+def find_resource(package_name: str, *, filename_contains: str) -> dict[str, Any]:
+    """Find the single resource whose download URL contains
+    `filename_contains` (case-insensitive). Raises if zero or more than
+    one match.
+
+    Matches on the URL's filename, NOT the resource's 'name' field --
+    the 'name' is an editable display label the publisher can (and, on
+    this portal, has) change at any time, e.g. from a filename-shaped
+    string to a human-readable one. The URL is generated from the
+    actual uploaded file and has stayed stable across that change, so
+    it's the reliable thing to match on.
     """
-    needle = name_contains.lower()
-    matches = [r for r in list_resources(package_name) if needle in r["name"].lower()]
+    needle = filename_contains.lower()
+    matches = [r for r in list_resources(package_name) if needle in r["url"].lower()]
     if not matches:
-        raise ValueError(f"No resource matching '{name_contains}' in package '{package_name}'")
+        raise ValueError(f"No resource with a URL matching '{filename_contains}' in package '{package_name}'")
     if len(matches) > 1:
-        names = [m["name"] for m in matches]
-        raise ValueError(f"Ambiguous match for '{name_contains}': {names}")
+        urls = [m["url"] for m in matches]
+        raise ValueError(f"Ambiguous match for '{filename_contains}': {urls}")
     return matches[0]
 
 

@@ -74,13 +74,15 @@ st.caption(
 )
 
 if not _data_ready():
-    st.warning("Raw data hasn't been downloaded yet.")
-    if st.button("Download data now"):
-        with st.spinner("Downloading from Toronto Open Data..."):
-            fetch_datasets()
-        st.cache_data.clear()
-        st.rerun()
-    st.stop()
+    # Auto-bootstrap rather than requiring a click -- on a host with an
+    # ephemeral filesystem (e.g. Streamlit Community Cloud), every cold
+    # start/wake-from-sleep starts with no data on disk, and a judge
+    # opening the link shouldn't have to click a button before seeing
+    # anything.
+    with st.spinner("First run: downloading from Toronto Open Data..."):
+        fetch_datasets()
+    st.cache_data.clear()
+    st.rerun()
 
 tab1, tab2, tab3 = st.tabs(["Decision Lifecycle", "Vote Outcomes & Priority", "Try the Model"])
 
@@ -119,14 +121,12 @@ with tab1:
 # --- Tab 2: Vote Outcomes & Engagement Priority -----------------------------
 with tab2:
     if not os.path.exists(MODEL_PATH):
-        st.warning("Model hasn't been trained yet.")
-        if st.button("Train model now"):
-            with st.spinner("Training..."):
-                model = train([VR_PATH])
-                os.makedirs("models", exist_ok=True)
-                joblib.dump(model, MODEL_PATH)
-            st.rerun()
-        st.stop()
+        # Same auto-bootstrap reasoning as the data download above.
+        with st.spinner("First run: training the outcome model..."):
+            model = train([VR_PATH])
+            os.makedirs("models", exist_ok=True)
+            joblib.dump(model, MODEL_PATH)
+        st.rerun()
 
     st.caption(
         "The Voting Record only contains **recorded votes** -- most routine council business passes on a "
