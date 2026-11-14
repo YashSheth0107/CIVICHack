@@ -2,7 +2,9 @@
 
 **🔗 Live app: [council-tracker.streamlit.app](https://council-tracker.streamlit.app/)**
 
-**📄 Municipal Readiness Report: [Google Drive](https://drive.google.com/file/d/1q6HS9bPb2pJd94zckKVveEuaBQ3RvDoV/view?usp=drive_link)**
+**📄 Municipal Readiness Report: [Google Drive](https://drive.google.com/file/d/17ROsVmyAJnUduStiLtRvFvFuoQGXt-jr/view?usp=sharing)**
+
+**🎥 Demo video: [Google Drive](https://drive.google.com/file/d/1qYyvLBUte3p1jSn6jsQbAwJWK1EJn2Og/view?usp=sharing)**
 
 [![Tests](https://github.com/YashSheth0107/CIVICHack/actions/workflows/tests.yml/badge.svg)](https://github.com/YashSheth0107/CIVICHack/actions/workflows/tests.yml)
 
