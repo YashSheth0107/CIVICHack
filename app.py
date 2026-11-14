@@ -334,6 +334,13 @@ with tab2:
     shown["Area"] = shown["committee"].apply(area_of)
     shown["Committee"] = shown["committee"].apply(friendly_committee)
     shown["What happened"] = shown["outcome"].map({"carried": "Passed", "not_carried": "Did not pass"})
+    # ProgressColumn's `format` is a plain printf string applied to the raw
+    # cell value -- it does NOT multiply by 100 for you. Left as a 0-1
+    # fraction, "%.0f%%" on 0.95 just rounds 0.95 to the nearest whole
+    # number and prints "1%", not "95%" (confirmed against Streamlit's own
+    # docs). Scaling to 0-100 here, with min/max updated to match below,
+    # is what actually fixes the displayed number.
+    shown["p_carried"] = (shown["p_carried"] * 100).round(1)
 
     tab2_display = shown.rename(
         columns={
@@ -351,7 +358,7 @@ with tab2:
         hide_index=True,
         column_config={
             "Predicted chance of passing": st.column_config.ProgressColumn(
-                "Predicted chance of passing", format="%.0f%%", min_value=0, max_value=1
+                "Predicted chance of passing", format="%.0f%%", min_value=0, max_value=100
             )
         },
     )
