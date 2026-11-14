@@ -82,7 +82,7 @@ If `data/raw/` or `models/outcome_model.joblib` are missing, the dashboard auto-
 - Deputation deadline / next-meeting-date extraction from agenda data (needs a third dataset not yet wired in).
 - Ward/geography mapping (needs a councillor-to-ward lookup; geocoding free text item titles is explicitly out of scope for now).
 
-## Known data quirks worth knowing before you extend this
+## Known data quirks worth knowing before extending this
 - The Voting Record only contains **recorded votes** — most routine business passes on a no-vote consent agenda and never appears there at all. Absence ≠ undecided.
 - The Report Request Log's `Status` field is `NCF`/`closed` (three different casings), not `Open`/`Closed` as you'd guess.
 - Its `Closed by` field is overloaded: sometimes a date, sometimes one-or-more follow-up item numbers.
