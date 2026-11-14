@@ -2,6 +2,8 @@
 
 **🔗 Live app: [council-tracker.streamlit.app](https://council-tracker.streamlit.app/)**
 
+**📄 Municipal Readiness Report: [Google Drive](https://drive.google.com/file/d/1q6HS9bPb2pJd94zckKVveEuaBQ3RvDoV/view?usp=drive_link)**
+
 [![Tests](https://github.com/YashSheth0107/CIVICHack/actions/workflows/tests.yml/badge.svg)](https://github.com/YashSheth0107/CIVICHack/actions/workflows/tests.yml)
 
 **Challenge**: How might we help residents understand a proposed municipal decision, how it could affect them, and when they can have a say?
